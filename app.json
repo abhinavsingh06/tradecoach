@@ -22,7 +22,8 @@
       "versionCode": 1,
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.INTERNET"
+        "android.permission.INTERNET",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#0B1220",
@@ -34,8 +35,15 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "data": [{ "scheme": "tradecoach" }],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "data": [
+            {
+              "scheme": "tradecoach"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -44,7 +52,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "e51910a2-1ea5-4389-abad-61a58048d7eb"
       }
     },
     "plugins": [
@@ -57,6 +65,7 @@
           "microphonePermission": "TradeCoach uses the microphone to record voice journal entries that are transcribed into your trade notes."
         }
       ]
-    ]
+    ],
+    "owner": "abhinavsingh9986"
   }
 }
