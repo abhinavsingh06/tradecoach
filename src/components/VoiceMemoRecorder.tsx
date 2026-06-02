@@ -1,81 +1,116 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+} from 'expo-audio';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+} from 'react-native';
 
 import { useVoiceTranscribe } from '../hooks/useFeatures';
 import { EMOTIONS, SETUPS, type Emotion, type Setup } from '../types';
 import { colors, radius, spacing } from '../utils/theme';
 
-type Props = {
+interface Props {
   tradeId: string;
   onStructured?: (data: {
     emotion: Emotion | null;
     setup: Setup | null;
     notes: string;
   }) => void;
-};
+}
 
+/**
+ * Tap to record a voice memo, tap again to stop. The clip is uploaded to the
+ * backend, transcribed with Whisper, and (optionally) parsed into
+ * {emotion, setup, notes} which the parent journal form can pre-fill.
+ *
+ * Built on `expo-audio` (SDK 56+). The previous `expo-av` API was removed.
+ */
 export const VoiceMemoRecorder = ({ tradeId, onStructured }: Props) => {
   const transcribe = useVoiceTranscribe();
-  const recRef = useRef<Audio.Recording | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recording, setRecording] = useState(false);
   const [permission, setPermission] = useState<boolean | null>(null);
+  const startedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
-    void Audio.requestPermissionsAsync().then(({ granted }) =>
-      setPermission(granted),
-    );
+    let cancelled = false;
+    (async () => {
+      const { granted } = await AudioModule.requestRecordingPermissionsAsync();
+      if (!cancelled) setPermission(granted);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const start = async () => {
     if (!permission) {
-      Alert.alert('Microphone', 'Allow microphone access to record voice memos.');
+      Alert.alert(
+        'Microphone',
+        'Allow microphone access to record voice memos.',
+      );
       return;
     }
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      allowsRecording: true,
     });
-    const { recording: rec } = await Audio.Recording.createAsync(
-      Audio.RecordingOptionsPresets.HIGH_QUALITY,
-    );
-    recRef.current = rec;
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+    startedAtRef.current = Date.now();
     setRecording(true);
   };
 
   const stop = async () => {
-    const rec = recRef.current;
-    if (!rec) return;
+    if (!recorder.isRecording) return;
     setRecording(false);
-    await rec.stopAndUnloadAsync();
-    const uri = rec.getURI();
-    const status = await rec.getStatusAsync();
-    recRef.current = null;
+
+    await recorder.stop();
+    const uri = recorder.uri;
+    const durationMs = startedAtRef.current
+      ? Date.now() - startedAtRef.current
+      : undefined;
+    startedAtRef.current = null;
+
     if (!uri) return;
+
     try {
       const { memo } = await transcribe.mutateAsync({
         uri,
         roundTripId: tradeId,
-        durationMs: status.durationMillis ?? undefined,
+        durationMs,
         structure: true,
       });
-      if (memo.structured && onStructured) {
-        const e = memo.structured.emotion;
-        const s = memo.structured.setup;
+
+      if (!onStructured) return;
+
+      if (memo.structured) {
+        const { emotion, setup, notes } = memo.structured;
         onStructured({
           emotion:
-            e && EMOTIONS.includes(e as Emotion) ? (e as Emotion) : null,
-          setup: s && SETUPS.includes(s as Setup) ? (s as Setup) : null,
-          notes: memo.structured.notes ?? memo.transcript ?? '',
+            emotion && EMOTIONS.includes(emotion as Emotion)
+              ? (emotion as Emotion)
+              : null,
+          setup:
+            setup && SETUPS.includes(setup as Setup) ? (setup as Setup) : null,
+          notes: notes ?? memo.transcript ?? '',
         });
-      } else if (memo.transcript && onStructured) {
+      } else if (memo.transcript) {
         onStructured({ emotion: null, setup: null, notes: memo.transcript });
       }
     } catch (e) {
       Alert.alert(
         'Transcription failed',
-        e instanceof Error ? e.message : 'Check OPENAI_API_KEY on server',
+        e instanceof Error ? e.message : 'Please try again later.',
       );
     }
   };
