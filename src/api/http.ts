@@ -70,10 +70,15 @@ export const request = async <T>(
   path: string,
   init: RequestOptions = {},
 ): Promise<T> => {
+  // Only declare `Content-Type: application/json` when we actually have a
+  // JSON body. React Native on Android (Hermes production builds) sends a
+  // stray `\x00` byte for empty-body POSTs when the JSON content-type is
+  // set — Express's body-parser then 400s with "Unexpected token \u0000".
+  // Skipping the header for body-less requests makes the parser short-circuit.
   const headers: Record<string, string> = {
-    'content-type': 'application/json',
     ...(init.headers as Record<string, string> | undefined),
   };
+  if (init.body != null) headers['content-type'] = 'application/json';
 
   if (init.auth !== false) {
     const token = await getSessionToken();
