@@ -41,7 +41,7 @@ import {
   useTodayPlanQuery,
   useTodayQuery,
 } from '../hooks/useToday';
-import { SETUPS, computePnL, type Trade } from '../types';
+import { SETUPS, type Trade } from '../types';
 import { formatInr } from '../utils/currency';
 import { marketStatus } from '../utils/market';
 import { colors, radius, spacing } from '../utils/theme';
@@ -99,7 +99,7 @@ export const DashboardScreen = ({ navigation }: Props) => {
     if (!trades.length) {
       return { totalPnL: 0, winRate: 0, count: 0, rr: 0 };
     }
-    const pnls = trades.map((t) => computePnL(t));
+    const pnls = trades.map((t) => t.grossPnl);
     const wins = pnls.filter((p) => p > 0);
     const losses = pnls.filter((p) => p < 0);
     const totalPnL = pnls.reduce((a, b) => a + b, 0);

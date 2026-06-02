@@ -34,7 +34,7 @@ const VALUE_PROPS = [
   {
     icon: 'sparkles-outline' as const,
     title: 'AI drafts your journal',
-    desc: 'Claude proposes emotion, setup, and notes. You just accept or edit.',
+    desc: 'AI proposes emotion, setup, and notes. You just accept or edit.',
   },
   {
     icon: 'pulse-outline' as const,

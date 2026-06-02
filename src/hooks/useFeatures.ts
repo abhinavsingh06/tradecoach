@@ -16,7 +16,7 @@ import {
   setGateAction,
   startRecovery,
   transcribeVoice,
-} from '../api/client';
+} from '../api';
 import { useAuth } from '../auth/AuthProvider';
 import { coachKeys } from './useToday';
 

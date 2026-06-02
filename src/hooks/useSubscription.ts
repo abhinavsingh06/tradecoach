@@ -6,7 +6,7 @@ import {
   fetchSubscription,
   startProCheckout,
   startProTrial,
-} from '../api/client';
+} from '../api';
 import { useAuth } from '../auth/AuthProvider';
 
 export const subKeys = {

@@ -7,7 +7,7 @@ import {
   fetchTrades,
   saveJournal,
   syncTrades,
-} from '../api/client';
+} from '../api';
 import { useAuth } from '../auth/AuthProvider';
 
 export const tradeKeys = {

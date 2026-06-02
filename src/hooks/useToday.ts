@@ -10,7 +10,7 @@ import {
   generateDebrief,
   requestJournalDraft,
   saveTodayPlan,
-} from '../api/client';
+} from '../api';
 import { useAuth } from '../auth/AuthProvider';
 import { tradeKeys } from './useTrades';
 

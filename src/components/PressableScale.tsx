@@ -1,7 +1,6 @@
 import { useRef, type ReactNode } from 'react';
 import {
   Animated,
-  Easing,
   Pressable,
   type PressableProps,
   type StyleProp,
@@ -65,6 +64,3 @@ export const PressableScale = ({
 };
 
 export default PressableScale;
-
-// Suppress unused import warning in some bundlers.
-void Easing;

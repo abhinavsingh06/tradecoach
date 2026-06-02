@@ -15,7 +15,7 @@ import { Button } from './Button';
 import { PaywallModal } from './PaywallModal';
 import { Pill } from './Pill';
 import { WalletCard, accents, skins } from './WalletCard';
-import { ApiError } from '../api/client';
+import { ApiError } from '../api';
 import { useGateAction, usePreTradeGate } from '../hooks/useFeatures';
 import { SETUPS, type GateVerdict, type PreTradeGateResult } from '../types';
 import { formatInrPlain } from '../utils/currency';

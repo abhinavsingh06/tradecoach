@@ -1,79 +1,128 @@
-# TradeCoach — AI Trading Journal & Coach
+# TradeCoach — Mobile App
 
-Expo app for Zerodha Kite traders: trades sync automatically from Kite, you tag
-emotion/setup after the fact, and Claude coaches your psychology.
+Expo / React Native app for Indian retail traders: connect Zerodha Kite, get
+your trades auto-synced into round trips, journal what you felt and why, and
+have an AI coach surface the patterns you can't see yourself.
 
-## Features
+> The backend lives in the sibling repo `../tradecoach-server`. The mobile app
+> never talks to OpenAI / Kite directly — every secret stays server-side.
 
-- **Kite login** — OAuth via Zerodha; no manual trade entry
-- **Auto sync** — today's fills → FIFO round trips (equity + F&O)
-- **Open positions** — unmatched legs on the dashboard
-- **Journal** — tag setup, emotion, notes on closed round trips
-- **AI Coach** — Claude reads your synced journal (API key in `.env` for now)
-- **Insights** — P&L by emotion, setup, long vs short (₹)
+## What's inside
 
-## Prerequisites
+- **Kite Connect OAuth** — sign in once, sessions auto-refresh at 6 AM IST
+- **Auto-sync** — fills → FIFO round trips (equity + F&O) the moment you open the app
+- **Journal** — tag emotion, setup, and notes; AI can draft for you (Pro)
+- **Pre-trade gate** — sanity-check a setup before you click buy (Pro)
+- **Wellness** — mood check-ins, loss-recovery flow, streaks
+- **Insights** — equity curve, hour-of-day heatmap, weekday breakdown, brokerage drag
+- **Coach chat** — talk to a coach that has read every journal entry (Pro)
+- **Tax + CSV export** — full F&O turnover and round-trip exports
+- **Freemium** — free tier covers data + analytics; Pro unlocks AI surfaces
 
-1. **Kite Connect** app at [developers.kite.trade](https://developers.kite.trade)
-2. **Backend** — sibling repo `../tradecoach-server` (Postgres + Node)
-3. **Public HTTPS URL** for OAuth — ngrok locally, Render in prod
+## Project layout
 
-## Quick start
+```
+TradeCoach/
+├── App.tsx                       # Providers + ErrorBoundary + router
+├── app.json                      # Expo / native config
+├── eas.json                      # EAS Build profiles (dev / preview / production)
+├── src/
+│   ├── api/                      # Per-domain HTTP clients
+│   │   ├── http.ts               # Shared request helper + ApiError
+│   │   ├── auth.ts trades.ts coach.ts gate.ts
+│   │   ├── wellness.ts voice.ts subscription.ts legal.ts
+│   │   └── index.ts              # Barrel — `import { … } from '../api'`
+│   ├── auth/
+│   │   ├── AuthProvider.tsx      # Context: user, entitlement, aiPro
+│   │   ├── redirect.ts           # OAuth deep-link / web-redirect plumbing
+│   │   └── session.ts            # SecureStore-backed token storage
+│   ├── components/               # Reusable UI primitives (WalletCard, Glass, …)
+│   ├── hooks/                    # React Query hooks (useTrades, useCoach, …)
+│   ├── navigation/               # Tabs + RootNavigator + navTheme
+│   ├── screens/                  # One screen per file
+│   ├── store/                    # Zustand (chat history; trades live on server)
+│   ├── types/                    # Shared TS contracts mirroring server DTOs
+│   └── utils/                    # theme, currency, market-hours helpers
+```
 
-### 1. Backend
+## Quick start (local)
+
+### 1. Start the backend
 
 ```bash
 cd ../tradecoach-server
-cp .env.example .env
-# Fill DATABASE_URL (Neon), KITE_API_KEY, KITE_API_SECRET, SESSION_JWT_SECRET
-# PUBLIC_BASE_URL = ngrok https URL when testing OAuth
+cp .env.example .env       # fill DATABASE_URL, KITE_*, SESSION_JWT_SECRET, OPENAI_API_KEY
 npm install
 npm run db:push
-npm run dev
+npm run dev                # http://localhost:4000
 ```
 
-Register redirect URL in Kite console:
+Register the redirect URL in the Kite developer console:
+`{PUBLIC_BASE_URL}/auth/kite/callback`.
 
-`{PUBLIC_BASE_URL}/auth/kite/callback`
-
-### 2. Mobile app
+### 2. Start the mobile app
 
 ```bash
-cd TradeCoach
-npm install
 cp .env.example .env
-# EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:4000  (not localhost on a real phone)
+# Simulator → leave EXPO_PUBLIC_API_URL=http://localhost:4000
+# Real phone on Wi-Fi → http://<your-mac-LAN-IP>:4000
+npm install
 npm start
 ```
 
-Press **w** for web, or use a **development build** on iOS (Expo Go on iPhone is
-stuck on SDK 54; this project uses SDK 56).
+- Press `i` for iOS Simulator (requires Xcode) or `a` for Android Emulator.
+- Press `w` for web (most flows work; native-only screens degrade gracefully).
+- For a real device, build a development client with EAS — Expo Go isn't
+  pinned to SDK 56.
 
 ### 3. First login
 
 1. Tap **Connect with Zerodha Kite**
-2. Sign in on kite.zerodha.com
-3. App receives `tradecoach://auth/complete?token=...`
-4. Tap **Sync** on Dashboard after trading
+2. Sign in on `kite.zerodha.com`
+3. You're returned to the app with `tradecoach://auth/complete?token=…`
+4. Tap **Sync** on Today after trading hours
 
-Kite sessions expire at **6 AM IST** daily — reconnect when prompted.
+Kite tokens expire daily at 6 AM IST — the app prompts you to reconnect.
 
-## Project structure
+## Builds
 
+| Profile     | Channel             | API URL                                   |
+| ----------- | ------------------- | ----------------------------------------- |
+| development | local dev client    | `http://localhost:4000`                   |
+| preview     | internal APK / TestFlight | `https://tradecoach-api.onrender.com` |
+| production  | Play Store AAB / App Store | `https://tradecoach-api.onrender.com` |
+
+```bash
+eas build --profile preview --platform android
+eas build --profile production --platform android
 ```
-TradeCoach/
-├── App.tsx                 # Auth gate + tabs + react-query
-├── tradecoach-server/      # Sibling repo (not inside this folder)
-├── src/
-│   ├── api/client.ts       # Backend HTTP client
-│   ├── auth/               # SecureStore session + Kite OAuth
-│   ├── hooks/              # useTrades, useCoach
-│   ├── screens/
-│   │   ├── LoginScreen.tsx
-│   │   ├── TradeDetailScreen.tsx  # Post-hoc journal tagging
-│   │   └── ...
-│   └── store/tradeStore.ts # Chat messages only (trades live on server)
+
+iOS builds require an Apple Developer Program membership ($99/yr) and a
+provisioning profile — Android-only is the default until you onboard.
+
+## Scripts
+
+```bash
+npm start          # Metro bundler
+npm run android    # open in Android emulator
+npm run ios        # open in iOS simulator
+npm run web        # open in browser
+npm run typecheck  # tsc --noEmit
 ```
+
+## Architecture notes
+
+- **AI runs server-side only.** The app calls `tradecoach-server` for every LLM
+  surface so the OpenAI key never ships in a bundle. If the server has no key
+  set, the app drops into "Lite mode" and hides AI-only UI automatically.
+- **Auth context is the single source of truth** for `user`, `entitlement`, and
+  the derived `aiPro` flag. Every Pro-gated surface reads `aiPro` to decide
+  whether to render itself or fall back to a paywall.
+- **React Query owns network state.** Hooks under `src/hooks/` map 1:1 to API
+  endpoints and expose typed query/mutation results. Screens never call
+  `fetch` directly.
+- **Crash safety**: a top-level `ErrorBoundary` catches render-tree throws and
+  shows a recoverable fallback instead of a white screen.
 
 ## License
 

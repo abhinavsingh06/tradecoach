@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { PaywallModal } from '../components/PaywallModal';
 import { WalletCard, accents, skins } from '../components/WalletCard';
-import { buildExportTradesUrl } from '../api/client';
+import { buildExportTradesUrl } from '../api';
 import { useAuth } from '../auth/AuthProvider';
 import { useAdminGrant, useLegalLinksQuery, useSubscriptionQuery } from '../hooks/useSubscription';
 import { colors, radius, spacing } from '../utils/theme';

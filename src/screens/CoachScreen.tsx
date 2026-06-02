@@ -64,7 +64,7 @@ export const CoachScreen = () => {
         <View style={styles.stickyHeader}>
           <View style={{ flex: 1 }}>
             <Text style={styles.kicker}>Coach</Text>
-            <Text style={styles.title}>Claude</Text>
+            <Text style={styles.title}>Mentor</Text>
             <Text style={styles.subtitle}>
               {coachOffline ? 'Not configured' : 'Reads your full journal'}
             </Text>
@@ -82,7 +82,7 @@ export const CoachScreen = () => {
 
         {messages.length === 0 ? (
           <View style={styles.intro}>
-            {/* Hero card — what Claude does. */}
+            {/* Hero card — what the coach does. */}
             <WalletCard
               skin={skins.violet}
               accent={accents.accent}
@@ -100,7 +100,7 @@ export const CoachScreen = () => {
               </View>
               <Text style={styles.introTitle}>Talk to your coach</Text>
               <Text style={styles.introText}>
-                Claude reads every round trip, every journal note, and every
+                Your coach reads every round trip, every journal note, and every
                 emotion tag — then mirrors back what you&apos;re missing.
               </Text>
             </WalletCard>

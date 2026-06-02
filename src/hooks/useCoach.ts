@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { ApiError, coachChat, type CoachChatTurn } from '../api/client';
+import { ApiError, coachChat, type CoachChatTurn } from '../api';
 import { useTradeStore } from '../store/tradeStore';
 
 export interface SendOptions {
@@ -56,13 +56,13 @@ export const useCoach = () => {
         addMessage({
           role: 'assistant',
           content: offline
-            ? "I'm not configured yet. Set OPENAI_API_KEY in tradecoach-server/.env and restart the server."
+            ? "Coach is temporarily unavailable. Please try again later."
             : pro
               ? "Coach chat is part of TradeCoach Pro. Tap the Settings icon → Subscription to start a free trial."
               : limited
-                ? "You've hit today's coach limit. Resets at midnight IST, or upgrade to Pro for higher limits."
+                ? "You've hit today's coach limit. It resets at midnight IST, or upgrade to Pro for higher limits."
                 : quota
-                  ? `Can't reach the coach right now — your OpenAI account has no usable quota.\n\n1. Open platform.openai.com → Settings → Billing\n2. Add a payment method (Pay-as-you-go)\n3. Ensure the project that owns this API key has spend enabled\n\nThen try again.`
+                  ? "Coach is unavailable right now. Please try again later."
                   : `Something went wrong: ${msg.slice(0, 280)}`,
         });
       } finally {

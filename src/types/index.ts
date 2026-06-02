@@ -238,11 +238,6 @@ export interface SubscriptionInfo {
   aiEnabled: boolean;
 }
 
-export const tradePnL = (t: Trade): number => t.grossPnl;
-
-/** Legacy alias used by coach + insights. */
-export const computePnL = tradePnL;
-
 // --- Cost analyzer -----------------------------------------------------------
 export interface CostBreakdown {
   brokerage: number;

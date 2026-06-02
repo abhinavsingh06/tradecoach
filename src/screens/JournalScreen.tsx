@@ -17,7 +17,7 @@ import { Pill } from '../components/Pill';
 import { PressableScale } from '../components/PressableScale';
 import { WalletCard, accents, skins } from '../components/WalletCard';
 import { useTradesQuery } from '../hooks/useTrades';
-import { computePnL, type Trade } from '../types';
+import type { Trade } from '../types';
 import { formatInr } from '../utils/currency';
 import { colors, spacing } from '../utils/theme';
 import type { RootStackParamList, RootTabParamList } from '../navigation/types';
@@ -42,9 +42,9 @@ export const JournalScreen = ({ navigation }: Props) => {
       case 'tagged':
         return trades.filter((t) => t.journal?.emotion || t.journal?.setup);
       case 'win':
-        return trades.filter((t) => computePnL(t) >= 0);
+        return trades.filter((t) => t.grossPnl >= 0);
       case 'loss':
-        return trades.filter((t) => computePnL(t) < 0);
+        return trades.filter((t) => t.grossPnl < 0);
       default:
         return trades;
     }
@@ -130,7 +130,7 @@ export const JournalScreen = ({ navigation }: Props) => {
             grouped.length ? styles.list : styles.emptyContent
           }
           renderItem={({ item }) => {
-            const dayPnl = item.items.reduce((a, t) => a + computePnL(t), 0);
+            const dayPnl = item.items.reduce((a, t) => a + t.grossPnl, 0);
             return (
               <View style={styles.section}>
                 <View style={styles.sectionHead}>
@@ -208,7 +208,7 @@ const TradeRow = ({
   onPress: () => void;
   last: boolean;
 }) => {
-  const pnl = computePnL(trade);
+  const pnl = trade.grossPnl;
   const positive = pnl >= 0;
   const tagged = trade.journal?.emotion || trade.journal?.setup;
   const draftPending =

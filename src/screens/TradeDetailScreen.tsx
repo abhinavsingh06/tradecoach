@@ -376,7 +376,7 @@ const AiDraftCard = ({
         <View style={styles.draftIcon}>
           <Ionicons name="sparkles" size={14} color={colors.accent} />
         </View>
-        <Text style={styles.draftTitle}>Claude&apos;s draft</Text>
+        <Text style={styles.draftTitle}>AI draft</Text>
         {fresh && draft ? (
           <View style={styles.draftFreshPill}>
             <Text style={styles.draftFreshText}>ready</Text>
@@ -421,7 +421,7 @@ const AiDraftCard = ({
       <Text style={styles.draftError}>{error}</Text>
     ) : (
       <Text style={styles.draftHint}>
-        Tap &ldquo;Generate&rdquo; and Claude will propose an emotion, setup, and
+        Tap &ldquo;Generate&rdquo; and your coach will propose an emotion, setup, and
         one-line notes — grounded in your past trades on this symbol.
       </Text>
     )}

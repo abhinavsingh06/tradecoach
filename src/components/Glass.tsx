@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, radius, shadows, spacing } from '../utils/theme';
+import { radius, shadows, spacing } from '../utils/theme';
 
 interface Props {
   children?: React.ReactNode;
@@ -181,6 +181,3 @@ const orbStyles = StyleSheet.create({
     borderRadius: 9999,
   },
 });
-
-// Re-export tokens unused warning suppressor (avoids dead-import lint).
-void colors;
